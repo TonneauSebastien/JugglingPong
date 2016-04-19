@@ -19,65 +19,25 @@ function preload() {
 
     var ball;
     var pad;
-    var tetris1;
-    var tetris2;
-    var tetris3;
+    var tetrisBlock;
 
     var group;
     var cursors;
 
+    var bounds;
+
     var tetrisArray;
     var canSpawnTetris;
+    var randomTetris;
 
-    game.load.image('ball', 'images/magic_ball.png');
-    game.load.image('pad', 'images/pad2.png');
+    game.load.image('ball', 'images/shinyball.png');
+    game.load.image('pad', 'images/wizball.png');
     game.load.image('tetrisblock1', 'images/tetrisblock1.png');
     game.load.image('tetrisblock2', 'images/tetrisblock2.png');
     game.load.image('tetrisblock3', 'images/tetrisblock3.png');
 
     game.load.physics('physicsData', 'physics/sprites.json');
 }
-
-/*var ball;
-var pad;
-var spritePad;
-
-function create() {
-
-    game.physics.startSystem(Phaser.Physics.ARCADE);
-
-    //  This creates a simple sprite that is using our loaded image and displays it on-screen and assign it to a variable
-    ball = game.add.sprite(300, 400, 'ball');
-
-    game.physics.enable(ball, Phaser.Physics.ARCADE);
-    
-    //  This gets it moving
-    ball.body.velocity.setTo(0, 100);
-    
-    //  This makes the game world bounce-able
-    ball.body.collideWorldBounds = true;
-    
-    //  This sets the image bounce energy for the horizontal  and vertical vectors (as an x,y point). "1" is 100% energy return
-    ball.body.bounce.set(1);
-
-    ball.body.gravity.set(0, 1000);
-
-
-
-    var pad = game.add.graphics();
-    pad.lineStyle(6,0xBADA55);
-    pad.drawEllipse(0, 0, 55, 15);
-
-    spritePad = game.add.sprite(game.world.centerX, 750);
-
-    game.physics.enable(spritePad, Phaser.Physics.ARCADE);
-    spritePad.body.immovable = true;
-
-    console.log( game.world )
-
-
-    spritePad.addChild(pad);
-}*/
 
 function create() {
 
@@ -90,19 +50,26 @@ function create() {
     tetrisArray = [];
 
     game.physics.p2.gravity.y = 500;
-    game.physics.p2.restitution = 1;
+    game.physics.p2.restitution = 0.7;
+
+    //bounds = new Phaser.Rectangle(0, 0, 600, 850);
 
     group = game.add.physicsGroup(Phaser.Physics.P2JS);
 
     ball = group.create(game.world.centerX, game.world.centerY, 'ball');
-    ball.body.setCircle(20);
-    ball.body.fixedRotation = true;
+    ball.body.setCircle(16);
+    ball.body.fixedRotation = false;
 
+    ball.checkWorldBounds = true;
+    ball.outOfBoundsKill = true;
+
+    //ball.input.boundsRect = bounds;
 
     pad = group.create(game.world.centerX, 750, 'pad');
-    pad.body.clearShapes();
-    pad.body.loadPolygon('physicsData', 'pad');
+    pad.body.setCircle(45);
     pad.body.static = true;
+    pad.checkWorldBounds = true;
+    pad.outOfBoundsKill = true;
 
     cursors = game.input.keyboard.createCursorKeys();
 
@@ -110,6 +77,11 @@ function create() {
 }
 
 function update () {
+
+    if(ball.position.y >= game.world.height - 16){
+       // ball.body.enable = false;
+       //group.enableBody = false;
+    }
 
     //game.physics.arcade.collide(ball, spritePad);
     pad.body.setZeroVelocity();
@@ -136,16 +108,39 @@ function update () {
         canSpawnTetris = false;
 
         setTimeout(function() {
-            tetris1 = group.create(game.world.randomX, 0, 'tetrisblock1');
-            tetris1.body.clearShapes();
-            tetris1.body.loadPolygon('physicsData', 'tetrisblock1');
-            tetris1.body.kinematic = true;
 
-            tetrisArray.push(tetris1);
+                randomTetris = MathUtil.rndIntRange(1,3);
+                switch(randomTetris){
+                    case 1 :
 
-            canSpawnTetris = true;
-        }, 2000);
-    }
+                        tetrisBlock = group.create(game.world.randomX, 0, 'tetrisblock1');
+                        tetrisBlock.body.clearShapes();
+                        tetrisBlock.body.loadPolygon('physicsData', 'tetrisblock1');
+                        tetrisBlock.body.kinematic = true;
+
+                    break;
+                    case 2 :
+
+                        tetrisBlock = group.create(game.world.randomX, 0, 'tetrisblock2');
+                        tetrisBlock.body.clearShapes();
+                        tetrisBlock.body.loadPolygon('physicsData', 'tetrisblock2');
+                        tetrisBlock.body.kinematic = true;
+
+                    break;
+                    case 3 :
+
+                        tetrisBlock = group.create(game.world.randomX, 0, 'tetrisblock3');
+                        tetrisBlock.body.clearShapes();
+                        tetrisBlock.body.loadPolygon('physicsData', 'tetrisblock3');
+                        tetrisBlock.body.kinematic = true;
+
+                    break;
+                }
+                // si ca bug c'est ici !
+                tetrisArray.push(tetrisBlock);
+                canSpawnTetris = true;
+            }, 2000);
+        }
 
     for (var i = 0; i < tetrisArray.length; i++) {
         tetrisArray[i].body.moveDown(300);
@@ -153,9 +148,6 @@ function update () {
 }
 
 function render () {
-
-    //debug helper
-    //game.debug.spriteInfo(ball, 32, 32);
 
 }
 
