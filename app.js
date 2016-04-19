@@ -21,10 +21,12 @@ function preload() {
     var pad;
     var tetrisBlock;
 
-    var group;
+    //var group;
     var cursors;
-
     var bounds;
+
+    var score;
+    var canIncrementScore;
 
     var tetrisArray;
     var canSpawnTetris;
@@ -48,28 +50,29 @@ function create() {
 
     canSpawnTetris = true;
     tetrisArray = [];
+    score = 0;
+    canIncrementScore = true;
 
     game.physics.p2.gravity.y = 500;
-    game.physics.p2.restitution = 0.7;
+    game.physics.p2.restitution = 1;
 
     //bounds = new Phaser.Rectangle(0, 0, 600, 850);
 
-    group = game.add.physicsGroup(Phaser.Physics.P2JS);
+    //group = game.add.physicsGroup(Phaser.Physics.P2JS);
 
-    ball = group.create(game.world.centerX, game.world.centerY, 'ball');
+    ball = game.add.sprite(300, 400, 'ball');    
+    pad = game.add.sprite(300, 750, 'pad');
+
+    game.physics.p2.enable([ball, pad], false);
+
     ball.body.setCircle(16);
     ball.body.fixedRotation = false;
 
-    ball.checkWorldBounds = true;
-    ball.outOfBoundsKill = true;
-
     //ball.input.boundsRect = bounds;
 
-    pad = group.create(game.world.centerX, 750, 'pad');
     pad.body.setCircle(45);
     pad.body.static = true;
-    pad.checkWorldBounds = true;
-    pad.outOfBoundsKill = true;
+
 
     cursors = game.input.keyboard.createCursorKeys();
 
@@ -79,8 +82,9 @@ function create() {
 function update () {
 
     if(ball.position.y >= game.world.height - 16){
-       // ball.body.enable = false;
-       //group.enableBody = false;
+        ball.destroy();
+        alert("score : " + score);
+        window.confirm(location.reload(true));
     }
 
     //game.physics.arcade.collide(ball, spritePad);
@@ -113,7 +117,8 @@ function update () {
                 switch(randomTetris){
                     case 1 :
 
-                        tetrisBlock = group.create(game.world.randomX, 0, 'tetrisblock1');
+                        tetrisBlock = game.add.sprite(game.world.randomX, 0, 'tetrisblock1');
+                        game.physics.p2.enable(tetrisBlock, false);
                         tetrisBlock.body.clearShapes();
                         tetrisBlock.body.loadPolygon('physicsData', 'tetrisblock1');
                         tetrisBlock.body.kinematic = true;
@@ -121,7 +126,8 @@ function update () {
                     break;
                     case 2 :
 
-                        tetrisBlock = group.create(game.world.randomX, 0, 'tetrisblock2');
+                        tetrisBlock = game.add.sprite(game.world.randomX, 0, 'tetrisblock2');
+                        game.physics.p2.enable(tetrisBlock, false);
                         tetrisBlock.body.clearShapes();
                         tetrisBlock.body.loadPolygon('physicsData', 'tetrisblock2');
                         tetrisBlock.body.kinematic = true;
@@ -129,26 +135,36 @@ function update () {
                     break;
                     case 3 :
 
-                        tetrisBlock = group.create(game.world.randomX, 0, 'tetrisblock3');
+                        tetrisBlock = game.add.sprite(game.world.randomX, 0, 'tetrisblock3');
+                        game.physics.p2.enable(tetrisBlock, false);
                         tetrisBlock.body.clearShapes();
                         tetrisBlock.body.loadPolygon('physicsData', 'tetrisblock3');
                         tetrisBlock.body.kinematic = true;
 
                     break;
                 }
-                // si ca bug c'est ici !
+                
                 tetrisArray.push(tetrisBlock);
                 canSpawnTetris = true;
-            }, 2000);
-        }
+            }, 1000);
+    }
+
+    if (canIncrementScore) {
+        canIncrementScore = false;
+        setTimeout(function() {
+            score++;
+            canIncrementScore = true;
+            console.log(score);
+        }, 1000)
+    }
 
     for (var i = 0; i < tetrisArray.length; i++) {
         tetrisArray[i].body.moveDown(300);
-    }    
+    }
 }
 
 function render () {
-
+    game.debug.text("score : "+score,32,32);
 }
 
 
